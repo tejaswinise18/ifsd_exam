@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shopping Complex</title>
+  <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Shop component
+    class Shop extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          name: props.name,
+          rent: props.rent
+        };
+      }
+
+      handleRentChange = (event) => {
+        this.setState({ rent: event.target.value });
+      }
+
+      handleUpdate = () => {
+        const { name, rent } = this.state;
+        this.props.onUpdate(name, parseFloat(rent));
+      }
+
+      handleDelete = () => {
+        const { name } = this.state;
+        this.props.onDelete(name);
+      }
+
+      render() {
+        const { name, rent } = this.state;
+        return (
+          <div>
+            <h3>{name}</h3>
+            <p>Rent: ${rent}</p>
+            <input type="number" value={rent} onChange={this.handleRentChange} />
+            <button onClick={this.handleUpdate}>Update</button>
+            <button onClick={this.handleDelete}>Delete</button>
+          </div>
+        );
+      }
+    }
+
+    // App component
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          shops: [],
+          totalRent: 0
+        };
+      }
+
+      handleAddShop = () => {
+        const name = prompt("Enter the name of the shop:");
+        const rent = parseFloat(prompt("Enter the rent for the shop:"));
+        const newShop = { name, rent };
+
+        this.setState(prevState => ({
+          shops: [...prevState.shops, newShop],
+          totalRent: prevState.totalRent + rent
+        }));
+      }
+
+      handleUpdateShop = (name, rent) => {
+        this.setState(prevState => ({
+          shops: prevState.shops.map(shop =>
+            shop.name === name ? { ...shop, rent } : shop
+          ),
+          totalRent: prevState.totalRent - shop.rent + rent
+        }));
+      }
+
+      handleDeleteShop = (name) => {
+        this.setState(prevState => ({
+          shops: prevState.shops.filter(shop => shop.name !== name),
+          totalRent: prevState.totalRent - shop.rent
+        }));
+      }
+
+      render() {
+        const { shops, totalRent } = this.state;
+        return (
+          <div>
+            <h2>Shopping Complex</h2>
+            <p>Total Rent: ${totalRent}</p>
+            <button onClick={this.handleAddShop}>Add Shop</button>
+            {shops.map(shop => (
+              <Shop
+                key={shop.name}
+                name={shop.name}
+                rent={shop.rent}
+                onUpdate={this.handleUpdateShop}
+                onDelete={this.handleDeleteShop}
+              />
+            ))}
+          </div>
+        );
+      }
+    }
+
+    // Render the App component
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
